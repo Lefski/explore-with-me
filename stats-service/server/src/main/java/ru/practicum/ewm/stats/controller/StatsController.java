@@ -39,7 +39,7 @@ public class StatsController {
             @RequestParam(required = false, defaultValue = "false") Boolean unique
     ) {
         log.info("Request for stats accepted. start {}, end {}, uris {}, unique {}", start, end, uris, unique);
-        if (start.isEqual(end)){
+        if (start.isEqual(end)) {
             return new ResponseEntity<>(List.of(), HttpStatus.OK);
         } else if (start.isAfter(end)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

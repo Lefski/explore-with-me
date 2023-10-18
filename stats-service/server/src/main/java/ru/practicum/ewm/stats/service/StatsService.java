@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface StatsService {
     EndpointHitDto createEndpointHit(EndpointHitDto endpointHitDto);
+
     List<ViewStatsDto> findEndpointHitStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique);
 
 
