@@ -1,4 +1,4 @@
-package ru.yandex.practicum.ewm.controller;
+package ru.practicum.ewm.stats.controller;
 
 
 import lombok.AllArgsConstructor;
@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.ewm.dto.EndpointHitDto;
-import ru.yandex.practicum.ewm.dto.ViewStatsDto;
-import ru.yandex.practicum.ewm.service.StatsService;
+import ru.practicum.ewm.dto.EndpointHitDto;
+import ru.practicum.ewm.dto.ViewStatsDto;
+import ru.practicum.ewm.stats.service.StatsService;
 
 import java.time.LocalDateTime;
 import java.util.List;

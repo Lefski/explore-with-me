@@ -1,7 +1,7 @@
-package ru.yandex.practicum.ewm.mapper;
+package ru.practicum.ewm.stats.mapper;
 
-import ru.yandex.practicum.ewm.dto.EndpointHitDto;
-import ru.yandex.practicum.ewm.model.EndpointHit;
+import ru.practicum.ewm.dto.EndpointHitDto;
+import ru.practicum.ewm.stats.model.EndpointHit;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

@@ -7,11 +7,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>ru.yandex.practicum.ewm</groupId>
     <artifactId>stats</artifactId>
     <packaging>pom</packaging>
 
-    <name>stats</name>
+    <name>stats-service</name>
     <url>http://maven.apache.org</url>
 
     <properties>

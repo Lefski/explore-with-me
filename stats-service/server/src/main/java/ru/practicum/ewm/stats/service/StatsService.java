@@ -1,7 +1,7 @@
-package ru.yandex.practicum.ewm.service;
+package ru.practicum.ewm.stats.service;
 
-import ru.yandex.practicum.ewm.dto.EndpointHitDto;
-import ru.yandex.practicum.ewm.dto.ViewStatsDto;
+import ru.practicum.ewm.dto.EndpointHitDto;
+import ru.practicum.ewm.dto.ViewStatsDto;
 
 import java.time.LocalDateTime;
 import java.util.List;

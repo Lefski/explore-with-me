@@ -1,13 +1,13 @@
-package ru.yandex.practicum.ewm.service;
+package ru.practicum.ewm.stats.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.ewm.dto.EndpointHitDto;
-import ru.yandex.practicum.ewm.dto.ViewStatsDto;
-import ru.yandex.practicum.ewm.mapper.EndpointHitMapper;
-import ru.yandex.practicum.ewm.model.EndpointHit;
-import ru.yandex.practicum.ewm.repository.StatsRepository;
+import ru.practicum.ewm.dto.EndpointHitDto;
+import ru.practicum.ewm.dto.ViewStatsDto;
+import ru.practicum.ewm.stats.mapper.EndpointHitMapper;
+import ru.practicum.ewm.stats.model.EndpointHit;
+import ru.practicum.ewm.stats.repository.StatsRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class StatsServiceImpl implements StatsService {
     public EndpointHitDto createEndpointHit(EndpointHitDto endpointHitDto) {
         EndpointHit endpointHit = EndpointHitMapper.toEndpointHit(endpointHitDto);
         EndpointHitDto savedEndpointHit = EndpointHitMapper.toDto(repository.save(endpointHit));
-        log.info("saved EndPointHit: {}", savedEndpointHit.toString());
+        log.info("saved EndPointHit: {}", savedEndpointHit);
         return savedEndpointHit;
     }
 
