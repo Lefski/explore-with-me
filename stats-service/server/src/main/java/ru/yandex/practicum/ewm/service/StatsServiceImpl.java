@@ -24,7 +24,7 @@ public class StatsServiceImpl implements StatsService {
     public EndpointHitDto createEndpointHit(EndpointHitDto endpointHitDto) {
         EndpointHit endpointHit = EndpointHitMapper.toEndpointHit(endpointHitDto);
         EndpointHitDto savedEndpointHit = EndpointHitMapper.toDto(repository.save(endpointHit));
-        log.info("сохранен EndPointHit: {}", savedEndpointHit);
+        log.info("saved EndPointHit: {}", savedEndpointHit.toString());
         return savedEndpointHit;
     }
 
@@ -42,7 +42,7 @@ public class StatsServiceImpl implements StatsService {
         } else if (!uris.isEmpty() && unique) {
             viewStatsDtos = repository.findAllEndPointHitsWithUniqueIpForSelectedUris(start, end, uris);
         }
-        log.info("Statistics formed from db: {}", viewStatsDtos);
+        log.info("Statistics formed from db with size: {}", viewStatsDtos.size());
         return viewStatsDtos;
     }
 

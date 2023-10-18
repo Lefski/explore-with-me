@@ -27,7 +27,7 @@ public class StatsController {
 
     @PostMapping("/hit")
     ResponseEntity<EndpointHitDto> postHit(@RequestBody @Validated EndpointHitDto endpointHitDto) {
-        log.info("EndpointHit accepted: {}", endpointHitDto);
+        log.info("EndpointHit accepted: {}", endpointHitDto.toString());
         return new ResponseEntity<>(statsService.createEndpointHit(endpointHitDto), HttpStatus.CREATED);
     }
 

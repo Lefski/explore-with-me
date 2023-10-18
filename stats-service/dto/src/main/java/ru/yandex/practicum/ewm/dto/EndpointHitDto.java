@@ -26,4 +26,15 @@ public class EndpointHitDto {
 
     @NotBlank(message = "app may not be blank or null")
     private String timestamp;
+
+    @Override
+    public String toString() {
+        return "EndpointHitDto{" +
+                "id=" + id +
+                ", app='" + app + '\'' +
+                ", uri='" + uri + '\'' +
+                ", ip='" + ip + '\'' +
+                ", timestamp='" + timestamp + '\'' +
+                '}';
+    }
 }
