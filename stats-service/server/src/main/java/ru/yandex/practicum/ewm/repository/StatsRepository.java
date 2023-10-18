@@ -11,28 +11,28 @@ import java.util.List;
 
 @Repository
 public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
-    @Query("select new ru.yandex.practicum.ewm.dto.ViewStatsDto(h.app, h.uri, cast(count(h.ip) as Integer)) " +
+    @Query("select new ru.yandex.practicum.ewm.dto.ViewStatsDto(h.app, h.uri, count(h.ip)) " +
             "from EndpointHit h " +
             "where h.timestamp > ?1 and h.timestamp < ?2 " +
             "group by h.app, h.uri " +
             "order by count(h.ip) desc")
     List<ViewStatsDto> findAllEndpointHits(LocalDateTime start, LocalDateTime end);
 
-    @Query("select new ru.yandex.practicum.ewm.dto.ViewStatsDto(h.app, h.uri, cast(count(h.ip) as Integer)) " +
+    @Query("select new ru.yandex.practicum.ewm.dto.ViewStatsDto(h.app, h.uri, count(h.ip)) " +
             "from EndpointHit h " +
             "where h.timestamp > ?1 and h.timestamp < ?2 and h.uri in ?3 " +
             "group by h.app, h.uri " +
             "order by count(h.ip) desc")
     List<ViewStatsDto> findAllEndpointHitsForSelectedUris(LocalDateTime start, LocalDateTime end, List<String> uris);
 
-    @Query("select new ru.yandex.practicum.ewm.dto.ViewStatsDto(h.app, h.uri, cast(count(distinct h.ip) as Integer)) " +
+    @Query("select new ru.yandex.practicum.ewm.dto.ViewStatsDto(h.app, h.uri, count(distinct h.ip)) " +
             "from EndpointHit h " +
             "where h.timestamp > ?1 and h.timestamp < ?2 " +
             "group by h.app, h.uri " +
             "order by count(h.ip) desc")
     List<ViewStatsDto> findAllEndPointHitsWithUniqueIp(LocalDateTime start, LocalDateTime end);
 
-    @Query("select new ru.yandex.practicum.ewm.dto.ViewStatsDto(h.app, h.uri, cast(count(distinct h.ip) as Integer)) " +
+    @Query("select new ru.yandex.practicum.ewm.dto.ViewStatsDto(h.app, h.uri, count(distinct h.ip)) " +
             "from EndpointHit h " +
             "where h.timestamp > ?1 and h.timestamp < ?2 and h.uri in ?3 " +
             "group by h.app, h.uri " +

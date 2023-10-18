@@ -11,6 +11,6 @@ public class ViewStatsDto {
 
     private String uri;
 
-    private Integer hits;
+    private Long hits;
 
 }

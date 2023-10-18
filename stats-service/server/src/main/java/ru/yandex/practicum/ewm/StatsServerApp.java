@@ -1,13 +1,17 @@
 package ru.yandex.practicum.ewm;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 /**
  * Hello world!
  *
  */
+@SpringBootApplication
 public class StatsServerApp
 {
     public static void main( String[] args )
     {
-        System.out.println( "Hello World!" );
+        SpringApplication.run(StatsServerApp.class, args);
     }
 }
