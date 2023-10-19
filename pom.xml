@@ -16,6 +16,7 @@
         <module>stats-service</module>
         <module>stats-service/server</module>
         <module>stats-service/dto</module>
+        <module>main-service</module>
     </modules>
 
 

@@ -23,7 +23,7 @@ public class StatsController {
 
     public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
-    private StatsService statsService;
+    private final StatsService statsService;
 
     @PostMapping("/hit")
     ResponseEntity<EndpointHitDto> postHit(@RequestBody @Validated EndpointHitDto endpointHitDto) {
