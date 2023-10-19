@@ -37,6 +37,8 @@ services:
       - "8080:8080"
     depends_on:
       - ewm-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/postgres
 
   ewm-db:
     image: postgres:14-alpine
@@ -47,7 +49,7 @@ services:
     ports:
       - "6540:5431"
     environment:
-      - POSTGRES_DB=explore-with-me-main
-      - POSTGRES_USER=explore-with-me-main
-      - POSTGRES_PASSWORD=explore-with-me-main
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
 
