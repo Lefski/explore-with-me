@@ -23,6 +23,18 @@ services:
       - POSTGRES_USER=explore-with-me-stats
       - POSTGRES_PASSWORD=explore-with-me-stats
 
+  ewm-service:
+    build: stats-service/server
+    ports:
+      - "8080:8080"
+    depends_on:
+      - stats-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/explore-with-me-stats
+      - SPRING_DATASOURCE_USERNAME=explore-with-me-stats
+      - SPRING_DATASOURCE_PASSWORD=explore-with-me-stats
+      - SERVER_PORT=8080
+
 
 #  ewm-service:
 #    ports:
