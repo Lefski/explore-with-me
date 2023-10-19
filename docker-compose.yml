@@ -5,21 +5,19 @@ services:
     container_name: stats-server-container
     ports:
       - "9090:9090"
-    depends_on:
-      - stats-db
     volumes:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - stats-db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
-      - SPRING_DATASOURCE_USERNAME=stats
-      - SPRING_DATASOURCE_PASSWORD=stats
 
   stats-db:
+    image: postgres:14-alpine
     build: stats-service/server
     ports:
       - "6541:5432"
-    image: postgres:14-alpine
     container_name: stats-db-container
     volumes:
       - "/etc/timezone:/etc/timezone:ro"
