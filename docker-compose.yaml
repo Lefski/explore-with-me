@@ -7,10 +7,13 @@ services:
       - "9090:9090"
     depends_on:
       - stats-db
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/explore-with-me-stats
-      - SPRING_DATASOURCE_USERNAME=explore-with-me-stats
-      - SPRING_DATASOURCE_PASSWORD=explore-with-me-stats
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
+      - SPRING_DATASOURCE_USERNAME=stats
+      - SPRING_DATASOURCE_PASSWORD=stats
 
   stats-db:
     build: stats-service/server
@@ -18,26 +21,35 @@ services:
       - "6541:5432"
     image: postgres:14-alpine
     container_name: stats-db-container
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     environment:
-      - POSTGRES_DB=explore-with-me-stats
-      - POSTGRES_USER=explore-with-me-stats
-      - POSTGRES_PASSWORD=explore-with-me-stats
+      - POSTGRES_DB=stats
+      - POSTGRES_USER=stats
+      - POSTGRES_PASSWORD=stats
 
-  ewm-service:
-    build: main-service
-    container_name: main-service-container
-    ports:
-      - "8080:8080"
-    depends_on:
-      - ewm-db
-
-  ewm-db:
-    image: postgres:14-alpine
-    container_name: main-service-db-container
-    ports:
-      - "6540:5431"
-    environment:
-      - POSTGRES_DB=explore-with-me-main
-      - POSTGRES_USER=explore-with-me-main
-      - POSTGRES_PASSWORD=explore-with-me-main
+#  ewm-service:
+#    build: main-service
+#    container_name: main-service-container
+#    volumes:
+#      - "/etc/timezone:/etc/timezone:ro"
+#      - "/etc/localtime:/etc/localtime:ro"
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - ewm-db
+#
+#  ewm-db:
+#    image: postgres:14-alpine
+#    container_name: main-service-db-container
+#    volumes:
+#      - "/etc/timezone:/etc/timezone:ro"
+#      - "/etc/localtime:/etc/localtime:ro"
+#    ports:
+#      - "6540:5431"
+#    environment:
+#      - POSTGRES_DB=explore-with-me-main
+#      - POSTGRES_USER=explore-with-me-main
+#      - POSTGRES_PASSWORD=explore-with-me-main
 
