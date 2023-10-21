@@ -1,6 +1,7 @@
 package ru.practicum.ewm.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -33,10 +34,15 @@ public class ErrorHandler {
         return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(ConflictException.class)
-    ResponseEntity<ErrorResponse> handleConflictExceptions(final ConflictException e) {
+    @ExceptionHandler({
+            org.hibernate.exception.ConstraintViolationException.class,
+            DataIntegrityViolationException.class,
+            ConflictException.class
+    })
+    ResponseEntity<ErrorResponse> handleDatabaseExceptions(final ConflictException e) {
         log.error("Exception: " + e.getMessage(), e);
         return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.CONFLICT);
     }
+
 
 }
