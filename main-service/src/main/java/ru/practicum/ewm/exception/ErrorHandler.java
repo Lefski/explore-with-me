@@ -43,6 +43,6 @@ public class ErrorHandler {
         log.error("Exception: " + e.getMessage(), e);
         return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.CONFLICT);
     }
-
+    //TODO: дописать корректное отображение ошибок по спецификации
 
 }
