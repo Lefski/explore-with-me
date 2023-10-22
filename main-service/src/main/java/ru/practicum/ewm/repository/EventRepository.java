@@ -2,8 +2,8 @@ package ru.practicum.ewm.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ru.practicum.ewm.model.Category;
+import ru.practicum.ewm.model.event.Event;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Long> {
+public interface EventRepository extends JpaRepository<Event, Long> {
 }

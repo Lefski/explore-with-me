@@ -21,7 +21,7 @@ import java.util.List;
 @RequestMapping(path = "/")
 public class PublicController {
 
-    public final PublicService publicService;
+    private final PublicService publicService;
 
     @Autowired
     public PublicController(PublicService publicService) {
