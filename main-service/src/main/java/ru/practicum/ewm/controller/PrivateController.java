@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.dto.event.NewEventDto;
+import ru.practicum.ewm.dto.event.UpdateEventUserRequest;
 import ru.practicum.ewm.dto.participationRequest.EventRequestStatusUpdateRequest;
 import ru.practicum.ewm.dto.participationRequest.EventRequestStatusUpdateResult;
 import ru.practicum.ewm.dto.participationRequest.ParticipationRequestDto;
@@ -63,7 +64,16 @@ public class PrivateController {
         return new ResponseEntity<>(privateService.getEventByInitiator(userId, eventId), HttpStatus.OK);
     }
 
-    //todo create patch
+    @PatchMapping("/{userId}/events/{eventId}")
+    ResponseEntity<EventFullDto> patchEventByUser(
+            @PathVariable @Positive Long userId,
+            @PathVariable @Positive Long eventId,
+            @RequestBody @Validated UpdateEventUserRequest updateEventUserRequest
+    ) {
+        log.info("Patch update event request from initiator accepted, userId={}, eventId={}, request:{}", userId, eventId, updateEventUserRequest);
+        return new ResponseEntity<>(privateService.patchEventByInitiator(userId, eventId, updateEventUserRequest), HttpStatus.OK);
+
+    }
 
     @GetMapping("/{userId}/events/{eventId}/requests")
     ResponseEntity<List<ParticipationRequestDto>> getAllParticipationRequestsByInitiator(

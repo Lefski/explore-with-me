@@ -44,7 +44,7 @@ public class NewEventDto {
     private Boolean requestModeration = true;
 
     @NotBlank(message = "title may not be null or blank")
-    @Size(max = 120, min = 3, message = "title may not be less than 3 or bigger than 120")
+    @Size(max = 120, min = 3, message = "title size may not be <3 or  >120")
     private String title;
 
     @Override

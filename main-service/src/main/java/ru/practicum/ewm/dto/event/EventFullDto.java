@@ -14,7 +14,7 @@ import ru.practicum.ewm.model.event.EventStatus;
 @Builder
 public class EventFullDto {
 
-    public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     private String annotation;
 

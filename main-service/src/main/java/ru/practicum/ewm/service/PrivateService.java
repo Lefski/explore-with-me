@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.dto.event.NewEventDto;
+import ru.practicum.ewm.dto.event.UpdateEventUserRequest;
 import ru.practicum.ewm.dto.participationRequest.EventRequestStatusUpdateRequest;
 import ru.practicum.ewm.dto.participationRequest.EventRequestStatusUpdateResult;
 import ru.practicum.ewm.dto.participationRequest.ParticipationRequestDto;
@@ -27,4 +28,6 @@ public interface PrivateService {
     List<ParticipationRequestDto> getParticipationRequestsByInitiator(Long userId, Long eventId);
 
     EventRequestStatusUpdateResult patchParticipationRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updateRequest);
+
+    EventFullDto patchEventByInitiator(Long userId, Long eventId, UpdateEventUserRequest updateRequest);
 }
