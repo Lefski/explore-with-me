@@ -68,5 +68,24 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
+    @Override
+    public String toString() {
+        return "Event{" +
+                "state=" + state +
+                ", annotation='" + annotation + '\'' +
+                ", category=" + category +
+                ", createdOn=" + createdOn +
+                ", initiator=" + initiator +
+                ", publishedOn=" + publishedOn +
+                ", description='" + description + '\'' +
+                ", eventDate=" + eventDate +
+                ", lat=" + lat +
+                ", lon=" + lon +
+                ", paid=" + paid +
+                ", participantsLimit=" + participantsLimit +
+                ", requestModeration=" + requestModeration +
+                ", title='" + title + '\'' +
+                ", id=" + id +
+                '}';
+    }
 }

@@ -2,7 +2,7 @@ package ru.practicum.ewm.service;
 
 import org.springframework.data.domain.Pageable;
 import ru.practicum.ewm.dto.CategoryDto;
-import ru.practicum.ewm.dto.UserDto;
+import ru.practicum.ewm.dto.user.UserDto;
 
 import java.util.List;
 

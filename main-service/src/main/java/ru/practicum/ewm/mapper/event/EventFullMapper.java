@@ -2,6 +2,7 @@ package ru.practicum.ewm.mapper.event;
 
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.Location;
+import ru.practicum.ewm.mapper.CategoryMapper;
 import ru.practicum.ewm.model.event.Event;
 
 import java.time.format.DateTimeFormatter;
@@ -12,7 +13,7 @@ public class EventFullMapper {
     public static EventFullDto toEventFullDto(Event event, Long confirmedRequests, Long views) {
         return EventFullDto.builder()
                 .annotation(event.getAnnotation())
-                .category(event.getCategory())
+                .category(CategoryMapper.toCategoryDto(event.getCategory()))
                 .confirmedRequests(confirmedRequests)
                 .createdOn(event.getCreatedOn().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)))
                 .description(event.getDescription())

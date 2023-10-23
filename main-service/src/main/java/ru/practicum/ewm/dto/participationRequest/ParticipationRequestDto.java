@@ -31,5 +31,14 @@ public class ParticipationRequestDto {
 
     private String created;
 
-
+    @Override
+    public String toString() {
+        return "ParticipationRequestDto{" +
+                "id=" + id +
+                ", status=" + status +
+                ", requester=" + requester +
+                ", event=" + event +
+                ", created='" + created + '\'' +
+                '}';
+    }
 }

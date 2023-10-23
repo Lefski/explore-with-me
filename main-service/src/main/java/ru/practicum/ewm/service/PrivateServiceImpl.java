@@ -3,18 +3,25 @@ package ru.practicum.ewm.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.dto.event.EventFullDto;
+import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.dto.event.NewEventDto;
+import ru.practicum.ewm.dto.participationRequest.EventRequestStatusUpdateRequest;
+import ru.practicum.ewm.dto.participationRequest.EventRequestStatusUpdateResult;
 import ru.practicum.ewm.dto.participationRequest.ParticipationRequestDto;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.mapper.event.EventFullMapper;
+import ru.practicum.ewm.mapper.event.EventShortMapper;
 import ru.practicum.ewm.mapper.event.NewEventMapper;
 import ru.practicum.ewm.mapper.participationRequest.ParticipationRequestMapper;
 import ru.practicum.ewm.model.Category;
 import ru.practicum.ewm.model.User;
 import ru.practicum.ewm.model.event.Event;
+import ru.practicum.ewm.model.event.EventStatus;
 import ru.practicum.ewm.model.participationRequest.ParticipationRequest;
 import ru.practicum.ewm.model.participationRequest.ParticipationRequestStatus;
 import ru.practicum.ewm.repository.CategoryRepository;
@@ -77,14 +84,14 @@ public class PrivateServiceImpl implements PrivateService {
             throw new ConflictException("Request already exists");
         } else if (Objects.equals(event.getInitiator().getId(), userId)) {
             throw new ConflictException("User can not request to take part in his own event");
-//        } else if (!event.getState().equals(EventStatus.PUBLISHED)) {
-//            throw new ConflictException("Event is not published"); todo undo comment for this section
+        } else if (!event.getState().equals(EventStatus.PUBLISHED)) {
+            throw new ConflictException("Event is not published");
         } else if (event.getParticipantsLimit() != 0 && getConfirmedRequests(eventId) >= event.getParticipantsLimit()) {
             //todo:check if requests need to be confirmed
             throw new ConflictException("Request limit for event");
         }
         ParticipationRequestStatus status = ParticipationRequestStatus.PENDING;
-        if (!event.getRequestModeration()) {
+        if (!event.getRequestModeration() || event.getParticipantsLimit() == 0) {
             status = ParticipationRequestStatus.CONFIRMED;
         }
         ParticipationRequest request = ParticipationRequest.builder().status(status).requester(user).event(event).build();
@@ -116,9 +123,113 @@ public class PrivateServiceImpl implements PrivateService {
             throw new NotFoundException("User should be author of request to cancel it");
         }
         request.setStatus(ParticipationRequestStatus.REJECTED);
-        ParticipationRequestDto savedRequest = ParticipationRequestMapper.toParticipationRequestDto(participationRequestRepository.save(request));
-        log.info("request status changed, requestDto:{}", savedRequest);
-        return savedRequest;
+        try {
+            ParticipationRequestDto savedRequest = ParticipationRequestMapper.toParticipationRequestDto(participationRequestRepository.save(request));
+            log.info("request status changed, requestDto:{}", savedRequest);
+            return savedRequest;
+        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+            throw new ConflictException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<EventShortDto> getEventsByUser(Long userId, Pageable page) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("user not found");
+        }
+        Page<Event> eventPage = eventRepository.findAllByInitiator_Id(userId, page);
+        List<Event> eventList = eventPage.toList();
+        List<EventShortDto> eventShortDtos = new ArrayList<>();
+        for (Event event :
+                eventList) {
+            eventShortDtos.add(EventShortMapper.toEventShortDto(event, getConfirmedRequests(event.getId()), getEventViews(event.getId())));
+        }
+        log.info("get events by user request completed, eventShortDtos:{}", eventShortDtos);
+        return eventShortDtos;
+    }
+
+    @Override
+    public EventFullDto getEventByInitiator(Long userId, Long eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("event not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("user not found"));
+        if (!user.getId().equals(event.getInitiator().getId())) {
+            throw new NotFoundException("event is not available for this user");
+        }
+        EventFullDto eventFullDto = EventFullMapper.toEventFullDto(event, getConfirmedRequests(eventId), getEventViews(eventId));
+        log.info("get full event info by initiator request completed, eventFullDto:{}", eventFullDto);
+        return eventFullDto;
+    }
+
+    @Override
+    public List<ParticipationRequestDto> getParticipationRequestsByInitiator(Long userId, Long eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("event not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("user not found"));
+        if (!user.getId().equals(event.getInitiator().getId())) {
+            throw new NotFoundException("event is not available for this user");
+        }
+        List<ParticipationRequest> requestList = participationRequestRepository.findAllByEvent_Id(eventId);
+        List<ParticipationRequestDto> requestDtos = new ArrayList<>();
+        for (ParticipationRequest request :
+                requestList) {
+            requestDtos.add(ParticipationRequestMapper.toParticipationRequestDto(request));
+        }
+        log.info("get all requests by event initiator request completed, requests:{}", requestDtos);
+        return requestDtos;
+
+    }
+
+    @Override
+    public EventRequestStatusUpdateResult patchParticipationRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updateRequest) {
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("event not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("user not found"));
+        if (!user.getId().equals(event.getInitiator().getId())) {
+            throw new NotFoundException("event is not available for this user");
+        }
+        if (!event.getRequestModeration() || event.getParticipantsLimit() == 0) {
+            List<ParticipationRequest> participationRequests = participationRequestRepository.findAllByEvent_IdIn(updateRequest.getRequestIds());
+            List<ParticipationRequestDto> participationRequestDtos = new ArrayList<>();
+            for (ParticipationRequest request :
+                    participationRequests) {
+                participationRequestDtos.add(ParticipationRequestMapper.toParticipationRequestDto(request));
+            }
+            return EventRequestStatusUpdateResult.builder()
+                    .confirmedRequests(participationRequestDtos)
+                    .rejectedRequests(new ArrayList<>())
+                    .build();
+        }
+        Long confirmedAmount = getConfirmedRequests(eventId);
+        if (confirmedAmount >= event.getParticipantsLimit()) {
+            throw new ConflictException("Participant limit reached, no new requests allowed");
+        }
+        List<Long> requestsList = updateRequest.getRequestIds();
+        List<ParticipationRequestDto> newConfirmedRequests = new ArrayList<>();
+        while (confirmedAmount + newConfirmedRequests.size() < event.getParticipantsLimit() && !requestsList.isEmpty()) {
+            ParticipationRequest participationRequest = participationRequestRepository.findById(requestsList.get(0))
+                    .orElseThrow(() -> new NotFoundException("no such ParticipationRequest"));
+            if (participationRequest.getStatus().equals(ParticipationRequestStatus.PENDING)) {
+                ParticipationRequestDto requestDto = ParticipationRequestMapper.toParticipationRequestDto(participationRequest);
+                newConfirmedRequests.add(requestDto);
+                requestsList.remove(0);
+            } else {
+                throw new ConflictException("Request status is not PENDIND");
+            }
+        }
+        List<ParticipationRequestDto> newRejectedRequests = new ArrayList<>();
+        if (!requestsList.isEmpty()) {
+            for (Long id :
+                    requestsList) {
+                newRejectedRequests.add(
+                        ParticipationRequestMapper.toParticipationRequestDto(
+                                participationRequestRepository.findById(id).orElseThrow(() -> new NotFoundException("no such request")
+                                )
+                        )
+                );
+            }
+        }
+        return EventRequestStatusUpdateResult.builder()
+                .confirmedRequests(newConfirmedRequests)
+                .rejectedRequests(newRejectedRequests)
+                .build();
     }
 
 
@@ -128,6 +239,6 @@ public class PrivateServiceImpl implements PrivateService {
 
     private Long getConfirmedRequests(Long eventId) {
         //todo change to confirmed requests
-        return participationRequestRepository.countByEvent_Id(eventId);
+        return participationRequestRepository.countByEvent_IdAndStatus(eventId, ParticipationRequestStatus.CONFIRMED);
     }
 }

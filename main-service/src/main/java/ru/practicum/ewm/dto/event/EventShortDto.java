@@ -1,48 +1,33 @@
 package ru.practicum.ewm.dto.event;
 
-
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.ewm.dto.CategoryDto;
-import ru.practicum.ewm.model.User;
-import ru.practicum.ewm.model.event.EventStatus;
+import ru.practicum.ewm.dto.user.UserShortDto;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EventFullDto {
+public class EventShortDto {
 
     public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     private String annotation;
 
-    private CategoryDto category;
+    private CategoryDto categoryDto;
 
     private Long confirmedRequests;
-
-    @DateTimeFormat(pattern = DATE_TIME_PATTERN)
-    private String createdOn;
-
-    private String description;
 
     @DateTimeFormat(pattern = DATE_TIME_PATTERN)
     private String eventDate;
 
     private Long id;
 
-    private User initiator;
-
-    private Location location;
+    private UserShortDto initiator;
 
     private Boolean paid;
-
-    private Integer participantLimit;
-
-    private Boolean requestModeration;
-
-    private EventStatus state;
 
     private String title;
 
@@ -50,20 +35,14 @@ public class EventFullDto {
 
     @Override
     public String toString() {
-        return "EventFullDto{" +
-                "annotation='" + annotation + '\'' +
-                ", category=" + category +
+        return "EventShortDto{" +
+                ", annotation='" + annotation + '\'' +
+                ", categoryDto=" + categoryDto +
                 ", confirmedRequests=" + confirmedRequests +
-                ", createdOn='" + createdOn + '\'' +
-                ", description='" + description + '\'' +
                 ", eventDate='" + eventDate + '\'' +
                 ", id=" + id +
                 ", initiator=" + initiator +
-                ", location=" + location +
                 ", paid=" + paid +
-                ", participantLimit=" + participantLimit +
-                ", requestModeration=" + requestModeration +
-                ", state=" + state +
                 ", title='" + title + '\'' +
                 ", views=" + views +
                 '}';

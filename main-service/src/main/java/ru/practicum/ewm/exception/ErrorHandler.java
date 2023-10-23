@@ -20,6 +20,7 @@ public class ErrorHandler {
             MethodArgumentNotValidException.class,
             ConstraintViolationException.class,
             HttpMessageNotReadableException.class,
+            IllegalStateException.class,
             ValidationException.class
     })
     ResponseEntity<ErrorResponse> handleValidationExceptions(final ValidationException e) {
