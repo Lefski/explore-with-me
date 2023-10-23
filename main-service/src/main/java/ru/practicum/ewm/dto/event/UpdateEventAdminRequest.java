@@ -1,12 +1,12 @@
 package ru.practicum.ewm.dto.event;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class UpdateEventAdminRequest extends UpdateEventUserRequest {
 }
 

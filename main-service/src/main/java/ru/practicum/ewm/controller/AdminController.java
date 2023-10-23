@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.CategoryDto;
+import ru.practicum.ewm.dto.event.EventFullDto;
+import ru.practicum.ewm.dto.event.UpdateEventAdminRequest;
 import ru.practicum.ewm.dto.user.UserDto;
 import ru.practicum.ewm.service.AdminService;
 
@@ -30,6 +32,35 @@ public class AdminController {
         this.adminService = adminService;
     }
 
+    @PostMapping("/categories")
+    ResponseEntity<CategoryDto> postCategory(@RequestBody @Validated CategoryDto categoryDto) {
+        log.info("Category post accepted: {}", categoryDto);
+        return new ResponseEntity<>(adminService.postCategory(categoryDto), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/categories/{catId}")
+    ResponseEntity<Void> deleteCategory(@PathVariable @Positive Long catId) {
+        log.info("Delete category request accepted, id={}", catId);
+        adminService.deleteCategory(catId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/categories/{catId}")
+    ResponseEntity<CategoryDto> patchCategory(@PathVariable @Positive Long catId, @RequestBody @Validated CategoryDto categoryDto) {
+        log.info("Patch category request accepted, catId={}, categoryDto={}", catId, categoryDto);
+        return new ResponseEntity<>(adminService.patchCategory(catId, categoryDto), HttpStatus.OK);
+    }
+
+    //todo make search request endpoint for admin
+    @PatchMapping("events/{eventId}")
+    ResponseEntity<EventFullDto> updateEventByAdmin(
+            @PathVariable @Positive Long eventId,
+            @RequestBody @Validated UpdateEventAdminRequest updateRequest
+    ) {
+        log.info("Patch event by admin request accepted, eventId={}, updateRequest:{}", eventId, updateRequest);
+        return new ResponseEntity<>(adminService.updateEventByAdmin(eventId, updateRequest), HttpStatus.OK);
+    }
+
 
     @PostMapping("/users")
     ResponseEntity<UserDto> postUser(@RequestBody @Validated UserDto userDto) {
@@ -49,27 +80,6 @@ public class AdminController {
         log.info("Delete user request accepted, id={}", userId);
         adminService.deleteUser(userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-
-    @PostMapping("/categories")
-    ResponseEntity<CategoryDto> postCategory(@RequestBody @Validated CategoryDto categoryDto) {
-        log.info("Category post accepted: {}", categoryDto);
-        return new ResponseEntity<>(adminService.postCategory(categoryDto), HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/categories/{catId}")
-    ResponseEntity<Void> deleteCategory(@PathVariable @Positive Long catId) {
-        log.info("Delete category request accepted, id={}", catId);
-        adminService.deleteCategory(catId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @PatchMapping("/categories/{catId}")
-    ResponseEntity<CategoryDto> patchCategory(@PathVariable @Positive Long catId, @RequestBody @Validated CategoryDto categoryDto) {
-        log.info("Patch category request accepted, catId={}, categoryDto={}", catId, categoryDto);
-        return new ResponseEntity<>(adminService.patchCategory(catId, categoryDto), HttpStatus.OK);
-
     }
 
 

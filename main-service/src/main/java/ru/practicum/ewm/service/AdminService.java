@@ -2,6 +2,8 @@ package ru.practicum.ewm.service;
 
 import org.springframework.data.domain.Pageable;
 import ru.practicum.ewm.dto.CategoryDto;
+import ru.practicum.ewm.dto.event.EventFullDto;
+import ru.practicum.ewm.dto.event.UpdateEventAdminRequest;
 import ru.practicum.ewm.dto.user.UserDto;
 
 import java.util.List;
@@ -18,4 +20,6 @@ public interface AdminService {
     void deleteCategory(Long categoryId);
 
     CategoryDto patchCategory(Long catId, CategoryDto categoryDto);
+
+    EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateRequest);
 }

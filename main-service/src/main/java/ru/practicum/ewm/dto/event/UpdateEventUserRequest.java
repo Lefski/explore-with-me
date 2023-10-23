@@ -31,4 +31,19 @@ public class UpdateEventUserRequest {
     @Size(max = 120, min = 3, message = "title size may not be <3 or  >120")
     private String title;
 
+    @Override
+    public String toString() {
+        return "UpdateEventUserRequest{" +
+                "stateAction=" + stateAction +
+                ", annotation='" + annotation + '\'' +
+                ", category=" + category +
+                ", description='" + description + '\'' +
+                ", eventDate='" + eventDate + '\'' +
+                ", location=" + location +
+                ", paid=" + paid +
+                ", participantLimit=" + participantLimit +
+                ", requestModeration=" + requestModeration +
+                ", title='" + title + '\'' +
+                '}';
+    }
 }

@@ -251,7 +251,7 @@ public class PrivateServiceImpl implements PrivateService {
         }
     }
 
-    private Event updateEvent(Event oldEvent, UpdateEventUserRequest updateRequest) {
+    public Event updateEvent(Event oldEvent, UpdateEventUserRequest updateRequest) {
         oldEvent.setAnnotation(updateRequest.getAnnotation() != null ? updateRequest.getAnnotation() : oldEvent.getAnnotation());
 
         if (oldEvent.getDescription() != null) {
@@ -270,14 +270,10 @@ public class PrivateServiceImpl implements PrivateService {
         if (updateRequest.getStateAction() != null) {
             switch (updateRequest.getStateAction()) {
                 case REJECT_EVENT:
-                case CANCEL_REVIEW:
                     oldEvent.setState(EventStatus.CANCELED);
                     break;
                 case SEND_TO_REVIEW:
                     oldEvent.setState(EventStatus.PENDING);
-                    break;
-                case PUBLISH_EVENT:
-                    oldEvent.setState(EventStatus.PUBLISHED);
                     break;
             }
         }
@@ -287,12 +283,12 @@ public class PrivateServiceImpl implements PrivateService {
         return oldEvent;
     }
 
-    private Long getEventViews(Long eventId) {
+    public Long getEventViews(Long eventId) {
         return 0L;
         //todo make request to stats server
     }
 
-    private Long getConfirmedRequests(Long eventId) {
+    public Long getConfirmedRequests(Long eventId) {
         //todo check if correctly changed to confirmed requests
         return participationRequestRepository.countByEvent_IdAndStatus(eventId, ParticipationRequestStatus.CONFIRMED);
     }
