@@ -40,6 +40,9 @@ public class EventFullDto {
 
     private Integer participantLimit;
 
+    @DateTimeFormat(pattern = DATE_TIME_PATTERN)
+    private String publishedOn;
+
     private Boolean requestModeration;
 
     private EventStatus state;
@@ -51,11 +54,9 @@ public class EventFullDto {
     @Override
     public String toString() {
         return "EventFullDto{" +
-                "annotation='" + annotation + '\'' +
                 ", category=" + category +
                 ", confirmedRequests=" + confirmedRequests +
                 ", createdOn='" + createdOn + '\'' +
-                ", description='" + description + '\'' +
                 ", eventDate='" + eventDate + '\'' +
                 ", id=" + id +
                 ", initiator=" + initiator +

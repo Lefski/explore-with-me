@@ -7,19 +7,29 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.dto.CategoryDto;
+import ru.practicum.ewm.dto.compilation.CompilationDto;
+import ru.practicum.ewm.dto.compilation.NewCompilationDto;
+import ru.practicum.ewm.dto.compilation.UpdateCompilationRequest;
 import ru.practicum.ewm.dto.event.EventFullDto;
+import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.dto.event.UpdateEventAdminRequest;
 import ru.practicum.ewm.dto.user.UserDto;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
+import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.mapper.CategoryMapper;
 import ru.practicum.ewm.mapper.UserMapper;
+import ru.practicum.ewm.mapper.compilation.CompilationDtoMapper;
+import ru.practicum.ewm.mapper.compilation.NewCompilationMapper;
 import ru.practicum.ewm.mapper.event.EventFullMapper;
+import ru.practicum.ewm.mapper.event.EventShortMapper;
 import ru.practicum.ewm.model.Category;
+import ru.practicum.ewm.model.Compilation;
 import ru.practicum.ewm.model.User;
 import ru.practicum.ewm.model.event.Event;
 import ru.practicum.ewm.model.event.EventStatus;
 import ru.practicum.ewm.repository.CategoryRepository;
+import ru.practicum.ewm.repository.CompilationRepository;
 import ru.practicum.ewm.repository.EventRepository;
 import ru.practicum.ewm.repository.UserRepository;
 
@@ -38,13 +48,15 @@ public class AdminServiceImpl implements AdminService {
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
     private final PrivateServiceImpl privateService;
+    private final CompilationRepository compilationRepository;
 
     @Autowired
-    public AdminServiceImpl(UserRepository userRepository, CategoryRepository categoryRepository, EventRepository eventRepository, PrivateServiceImpl privateService) {
+    public AdminServiceImpl(UserRepository userRepository, CategoryRepository categoryRepository, EventRepository eventRepository, PrivateServiceImpl privateService, CompilationRepository compilationRepository) {
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.eventRepository = eventRepository;
         this.privateService = privateService;
+        this.compilationRepository = compilationRepository;
     }
 
     @Override
@@ -122,6 +134,12 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateRequest) {
         Event oldEvent = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("event not found"));
+        if (updateRequest.getEventDate() != null) {
+            if (LocalDateTime.parse(updateRequest.getEventDate(), DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)).isBefore(LocalDateTime.now())) {
+                throw new ValidationException("event date may not be in the past");
+            }
+        }
+
         Event updatedEvent = updateEvent(oldEvent, updateRequest);
         try {
             EventFullDto updatedEventDto = EventFullMapper.toEventFullDto(eventRepository.save(updatedEvent), privateService.getConfirmedRequests(eventId), privateService.getEventViews(eventId));
@@ -135,7 +153,7 @@ public class AdminServiceImpl implements AdminService {
 
     public Event updateEvent(Event oldEvent, UpdateEventAdminRequest updateRequest) {
         oldEvent.setAnnotation(updateRequest.getAnnotation() != null ? updateRequest.getAnnotation() : oldEvent.getAnnotation());
-        if (updateRequest.getDescription() != null) {
+        if (updateRequest.getCategory() != null) {
             Category category = categoryRepository.findById(updateRequest.getCategory()).orElseThrow(() -> new NotFoundException("no such category"));
             oldEvent.setCategory(category);
         }
@@ -148,7 +166,7 @@ public class AdminServiceImpl implements AdminService {
         oldEvent.setRequestModeration(updateRequest.getRequestModeration() != null ? updateRequest.getRequestModeration() : oldEvent.getRequestModeration());
         if (updateRequest.getStateAction() != null) {
             switch (updateRequest.getStateAction()) {
-                case CANCEL_REVIEW:
+                case REJECT_EVENT:
                     if (!oldEvent.getState().equals(EventStatus.PUBLISHED)) {
                         //событие можно отклонить, только если оно еще не опубликовано
                         oldEvent.setState(EventStatus.CANCELED);
@@ -174,4 +192,61 @@ public class AdminServiceImpl implements AdminService {
 
         return oldEvent;
     }
+
+    @Override
+    public CompilationDto postCompilationDto(NewCompilationDto compilationDto) {
+        List<Event> events = eventRepository.findAllById(compilationDto.getEvents());
+
+        Compilation compilation = NewCompilationMapper.toCompilation(compilationDto);
+        compilation.setEvents(events);
+        try {
+            Compilation savedCompilation = compilationRepository.save(compilation);
+            List<EventShortDto> eventShortDtos = new ArrayList<>();
+            for (Event event :
+                    events) {
+                eventShortDtos.add(EventShortMapper.toEventShortDto(event, privateService.getConfirmedRequests(event.getId()), privateService.getEventViews(event.getId())));
+            }
+            CompilationDto savedCompilationDto = CompilationDtoMapper.toCompilationDto(savedCompilation, eventShortDtos);
+            log.info("post compilation by admin request completed, compilationDto:{}", compilationDto);
+            return savedCompilationDto;
+        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+            throw new ConflictException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteCompilation(Long compId) {
+        if (compilationRepository.existsById(compId)) {
+            compilationRepository.deleteById(compId);
+            log.info("delete compilation by admin request complete, compId={}", compId);
+        } else throw new NotFoundException("no such compilation");
+    }
+
+    @Override
+    public CompilationDto patchCompilation(Long compId, UpdateCompilationRequest updateRequest) {
+        Compilation oldCompilation = compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException("no such compilation"));
+        oldCompilation.setPinned(updateRequest.getPinned() != null ? updateRequest.getPinned() : oldCompilation.getPinned());
+        oldCompilation.setTitle(updateRequest.getTitle() != null ? updateRequest.getTitle() : oldCompilation.getTitle());
+
+        if (updateRequest.getEvents() != null) {
+            List<Event> events = eventRepository.findAllById(updateRequest.getEvents());
+            oldCompilation.setEvents(events);
+        }
+        try {
+            Compilation updatedCompilation = compilationRepository.save(oldCompilation);
+            List<Event> events = oldCompilation.getEvents();
+            List<EventShortDto> eventShortDtos = new ArrayList<>();
+            for (Event event :
+                    events) {
+                eventShortDtos.add(EventShortMapper.toEventShortDto(event, privateService.getConfirmedRequests(event.getId()), privateService.getEventViews(event.getId())));
+            }
+            CompilationDto compilationDto = CompilationDtoMapper.toCompilationDto(updatedCompilation, eventShortDtos);
+            log.info("patch compilation by admin request completed, compilationDto:{}", compilationDto);
+            return compilationDto;
+        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+            throw new ConflictException(e.getMessage());
+        }
+    }
+
+
 }

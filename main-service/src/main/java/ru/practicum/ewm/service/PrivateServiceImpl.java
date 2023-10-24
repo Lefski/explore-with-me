@@ -15,6 +15,7 @@ import ru.practicum.ewm.dto.participationRequest.EventRequestStatusUpdateResult;
 import ru.practicum.ewm.dto.participationRequest.ParticipationRequestDto;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
+import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.mapper.event.EventFullMapper;
 import ru.practicum.ewm.mapper.event.EventShortMapper;
 import ru.practicum.ewm.mapper.event.NewEventMapper;
@@ -31,7 +32,6 @@ import ru.practicum.ewm.repository.ParticipationRequestRepository;
 import ru.practicum.ewm.repository.UserRepository;
 
 import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -120,10 +120,10 @@ public class PrivateServiceImpl implements PrivateService {
     @Override
     public ParticipationRequestDto patchParticipationRequest(Long userId, Long requestId) {
         ParticipationRequest request = participationRequestRepository.findById(requestId).orElseThrow(() -> new NotFoundException("request not found"));
-        if (!Objects.equals(request.getRequester().getId(), requestId)) {
+        if (!Objects.equals(request.getRequester().getId(), userId)) {
             throw new NotFoundException("User should be author of request to cancel it");
         }
-        request.setStatus(ParticipationRequestStatus.REJECTED);
+        request.setStatus(ParticipationRequestStatus.CANCELED);
         try {
             ParticipationRequestDto savedRequest = ParticipationRequestMapper.toParticipationRequestDto(participationRequestRepository.save(request));
             log.info("request status changed, requestDto:{}", savedRequest);
@@ -236,9 +236,17 @@ public class PrivateServiceImpl implements PrivateService {
     @Override
     public EventFullDto patchEventByInitiator(Long userId, Long eventId, UpdateEventUserRequest updateRequest) {
         Event oldEvent = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("event not found"));
+        if (oldEvent.getState().equals(EventStatus.PUBLISHED)) {
+            throw new ConflictException("event is already published");
+        }
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("user not found"));
         if (!user.getId().equals(oldEvent.getInitiator().getId())) {
             throw new NotFoundException("event is not available for this user");
+        }
+        if (updateRequest.getEventDate() != null) {
+            if (LocalDateTime.parse(updateRequest.getEventDate(), DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)).isBefore(LocalDateTime.now())) {
+                throw new ru.practicum.ewm.exception.ValidationException("event date may not be in the past");
+            }
         }
         Event updatedEvent = updateEvent(oldEvent, updateRequest);
 
@@ -254,22 +262,22 @@ public class PrivateServiceImpl implements PrivateService {
     public Event updateEvent(Event oldEvent, UpdateEventUserRequest updateRequest) {
         oldEvent.setAnnotation(updateRequest.getAnnotation() != null ? updateRequest.getAnnotation() : oldEvent.getAnnotation());
 
-        if (oldEvent.getDescription() != null) {
+        if (updateRequest.getCategory() != null) {
             Category category = categoryRepository.findById(updateRequest.getCategory()).orElseThrow(() -> new NotFoundException("no such category"));
             oldEvent.setCategory(category);
         }
 
         oldEvent.setDescription(updateRequest.getDescription() != null ? updateRequest.getDescription() : oldEvent.getDescription());
         oldEvent.setEventDate(updateRequest.getEventDate() != null ? LocalDateTime.parse(updateRequest.getEventDate(), DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)) : oldEvent.getEventDate());
-        oldEvent.setLat(updateRequest.getLocation().getLat());
-        oldEvent.setLon(updateRequest.getLocation().getLon());
+        oldEvent.setLat(updateRequest.getLocation() != null ? updateRequest.getLocation().getLat() : oldEvent.getLat());
+        oldEvent.setLon(updateRequest.getLocation() != null ? updateRequest.getLocation().getLon() : oldEvent.getLon());
         oldEvent.setPaid(updateRequest.getPaid() != null ? updateRequest.getPaid() : oldEvent.getPaid());
         oldEvent.setParticipantsLimit(updateRequest.getParticipantLimit() != null ? updateRequest.getParticipantLimit() : oldEvent.getParticipantsLimit());
         oldEvent.setRequestModeration(updateRequest.getRequestModeration() != null ? updateRequest.getRequestModeration() : oldEvent.getRequestModeration());
 
         if (updateRequest.getStateAction() != null) {
             switch (updateRequest.getStateAction()) {
-                case REJECT_EVENT:
+                case CANCEL_REVIEW:
                     oldEvent.setState(EventStatus.CANCELED);
                     break;
                 case SEND_TO_REVIEW:

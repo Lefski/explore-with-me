@@ -23,6 +23,7 @@ public class EventFullMapper {
                 .location(new Location(event.getLat(), event.getLon()))
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantsLimit())
+                .publishedOn(event.getPublishedOn() != null ? event.getPublishedOn().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)) : null)
                 .requestModeration(event.getRequestModeration())
                 .state(event.getState())
                 .title(event.getTitle())

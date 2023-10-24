@@ -114,7 +114,7 @@ public class PrivateController {
 
     @PatchMapping("/{userId}/requests/{requestId}/cancel")
     ResponseEntity<ParticipationRequestDto> patchParticipationRequest(
-            @RequestParam @Positive Long userId,
+            @PathVariable @Positive Long userId,
             @PathVariable @Positive Long requestId
     ) {
         log.info("Patch request accepted for requestId={}, userId={}", requestId, userId);

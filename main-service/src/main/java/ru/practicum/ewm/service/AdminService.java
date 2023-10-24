@@ -2,6 +2,9 @@ package ru.practicum.ewm.service;
 
 import org.springframework.data.domain.Pageable;
 import ru.practicum.ewm.dto.CategoryDto;
+import ru.practicum.ewm.dto.compilation.CompilationDto;
+import ru.practicum.ewm.dto.compilation.NewCompilationDto;
+import ru.practicum.ewm.dto.compilation.UpdateCompilationRequest;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.UpdateEventAdminRequest;
 import ru.practicum.ewm.dto.user.UserDto;
@@ -22,4 +25,10 @@ public interface AdminService {
     CategoryDto patchCategory(Long catId, CategoryDto categoryDto);
 
     EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateRequest);
+
+    CompilationDto postCompilationDto(NewCompilationDto compilationDto);
+
+    void deleteCompilation(Long compId);
+
+    CompilationDto patchCompilation(Long compId, UpdateCompilationRequest updateRequest);
 }
