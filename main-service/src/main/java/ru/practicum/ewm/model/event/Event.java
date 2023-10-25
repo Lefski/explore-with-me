@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @Builder
 @Table(name = "events")
 public class Event {
-    //todo: доделать статус публикации, статус отмена только из ожидания
     @Enumerated(EnumType.STRING)
     private EventStatus state;
 

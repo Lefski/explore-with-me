@@ -34,19 +34,4 @@ public class NewEventMapper {
                 .build();
     }
 
-//    public static NewEventDto toNewEventDto(Event event) {
-//        return NewEventDto.builder()
-//                .id(event.getId())
-//                .location(new LocationDto(event.getLat(), event.getLon()))
-//                .annotation(event.getAnnotation())
-//                .category(event.getCategory().getId())
-//                .description(event.getDescription())
-//                .eventDate(event.getEventDate())
-//                .paid(event.getPaid())
-//                .participantLimit(event.getParticipantsLimit())
-//                .requestModeration(event.getRequestModeration())
-//                .title(event.getTitle())
-//                .build(); //todo: решить нужен ли закомментированный код
-//    }
-
 }

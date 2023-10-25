@@ -16,7 +16,7 @@ public class EventShortDto {
 
     private String annotation;
 
-    private CategoryDto categoryDto;
+    private CategoryDto category;
 
     private Long confirmedRequests;
 
@@ -37,7 +37,7 @@ public class EventShortDto {
     public String toString() {
         return "EventShortDto{" +
                 ", annotation='" + annotation + '\'' +
-                ", categoryDto=" + categoryDto +
+                ", categoryDto=" + category +
                 ", confirmedRequests=" + confirmedRequests +
                 ", eventDate='" + eventDate + '\'' +
                 ", id=" + id +

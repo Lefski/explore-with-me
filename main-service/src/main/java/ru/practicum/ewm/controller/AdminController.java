@@ -4,6 +4,7 @@ package ru.practicum.ewm.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -14,11 +15,13 @@ import ru.practicum.ewm.dto.compilation.NewCompilationDto;
 import ru.practicum.ewm.dto.compilation.UpdateCompilationRequest;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.UpdateEventAdminRequest;
+import ru.practicum.ewm.dto.filter.AdminSearchFilter;
 import ru.practicum.ewm.dto.user.UserDto;
 import ru.practicum.ewm.service.AdminService;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -27,7 +30,9 @@ import java.util.List;
 @RequestMapping(path = "/admin")
 public class AdminController {
 
+    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public final AdminService adminService;
+
 
     @Autowired
     public AdminController(AdminService adminService) {
@@ -53,8 +58,30 @@ public class AdminController {
         return new ResponseEntity<>(adminService.patchCategory(catId, categoryDto), HttpStatus.OK);
     }
 
-    //todo make search request endpoint for admin
-    @PatchMapping("events/{eventId}")
+    @GetMapping("/events")
+    ResponseEntity<List<EventFullDto>> getEvents(
+            @RequestParam(required = false) List<Long> users,
+            @RequestParam(required = false) List<String> states,
+            @RequestParam(required = false) List<Long> categories,
+            @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_PATTERN) LocalDateTime rangeStart,
+            @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_PATTERN) LocalDateTime rangeEnd,
+            @RequestParam(required = false, defaultValue = "0") int from,
+            @RequestParam(required = false, defaultValue = "10") int size
+    ) {
+        PageRequest page = PageRequest.of(from / size, size);
+        AdminSearchFilter adminSearchFilter = AdminSearchFilter.builder()
+                .users(users)
+                .states(states)
+                .categories(categories)
+                .rangeStart(rangeStart)
+                .rangeEnd(rangeEnd)
+                .build();
+        log.info("Get events with filter search by admin request accepted, filter{}", adminSearchFilter);
+
+        return new ResponseEntity<>(adminService.getEvents(adminSearchFilter, page), HttpStatus.OK);
+    }
+
+    @PatchMapping("/events/{eventId}")
     ResponseEntity<EventFullDto> updateEventByAdmin(
             @PathVariable @Positive Long eventId,
             @RequestBody @Validated UpdateEventAdminRequest updateRequest
@@ -111,6 +138,5 @@ public class AdminController {
     }
 
     //todo раскидать общие контроллеры по отдельным контроллерам
-
 
 }

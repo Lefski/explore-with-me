@@ -5,22 +5,31 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.dto.CategoryDto;
 import ru.practicum.ewm.dto.compilation.CompilationDto;
+import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
+import ru.practicum.ewm.dto.filter.PublicSearchFilter;
 import ru.practicum.ewm.exception.NotFoundException;
+import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.mapper.CategoryMapper;
 import ru.practicum.ewm.mapper.compilation.CompilationDtoMapper;
+import ru.practicum.ewm.mapper.event.EventFullMapper;
 import ru.practicum.ewm.mapper.event.EventShortMapper;
 import ru.practicum.ewm.model.Category;
 import ru.practicum.ewm.model.Compilation;
 import ru.practicum.ewm.model.event.Event;
+import ru.practicum.ewm.model.event.EventStatus;
 import ru.practicum.ewm.repository.CategoryRepository;
 import ru.practicum.ewm.repository.CompilationRepository;
+import ru.practicum.ewm.repository.EventRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static ru.practicum.ewm.dto.EventSpecification.*;
 
 @Service
 @Slf4j
@@ -29,12 +38,14 @@ public class PublicServiceImpl implements PublicService {
     private final CategoryRepository categoryRepository;
     private final CompilationRepository compilationRepository;
     private final PrivateServiceImpl privateService;
+    private final EventRepository eventRepository;
 
     @Autowired
-    public PublicServiceImpl(CategoryRepository categoryRepository, CompilationRepository compilationRepository, PrivateServiceImpl privateService) {
+    public PublicServiceImpl(CategoryRepository categoryRepository, CompilationRepository compilationRepository, PrivateServiceImpl privateService, EventRepository eventRepository) {
         this.categoryRepository = categoryRepository;
         this.compilationRepository = compilationRepository;
         this.privateService = privateService;
+        this.eventRepository = eventRepository;
     }
 
     @Override
@@ -88,5 +99,35 @@ public class PublicServiceImpl implements PublicService {
         CompilationDto compilationDto = CompilationDtoMapper.toCompilationDto(compilation, eventShortDtos);
         log.info("Search request for compilationId={} completed, found compilation: {}", compId, compilationDto);
         return compilationDto;
+    }
+
+    @Override
+    public EventFullDto getEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("no such event"));
+        if (!event.getState().equals(EventStatus.PUBLISHED)) {
+            throw new NotFoundException("no such published event");
+        }
+        EventFullDto eventFullDto = EventFullMapper.toEventFullDto(event, privateService.getConfirmedRequests(eventId), privateService.getEventViews(eventId));
+        log.info("get event request completed, found event:{}", eventFullDto);
+        return eventFullDto;
+    }
+
+    @Override
+    public List<EventShortDto> getEvents(PublicSearchFilter publicSearchFilter, Pageable page) {
+        List<Specification<Event>> specifications = publicSearchFilterToSpecification(publicSearchFilter);
+        Page<Event> eventsPage = eventRepository.findAll((checkByAnnotation(publicSearchFilter.getText()))
+                .or(checkByDescription(publicSearchFilter.getText()))
+                .or(specifications.stream().reduce(Specification::and).get()), page);
+        List<Event> eventList = eventsPage.getContent();
+        List<EventShortDto> eventShortDtos = new ArrayList<>();
+        for (Event event :
+                eventList) {
+            eventShortDtos.add(EventShortMapper.toEventShortDto(event, privateService.getConfirmedRequests(event.getId()), privateService.getEventViews(event.getId())));
+        }
+        if (eventList.isEmpty()) {
+            throw new ValidationException("Request is empty");
+        } else {
+            return eventShortDtos;
+        }
     }
 }

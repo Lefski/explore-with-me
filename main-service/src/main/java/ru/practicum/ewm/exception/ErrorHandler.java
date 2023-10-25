@@ -21,16 +21,6 @@ public class ErrorHandler {
 
     }
 
-//    @ExceptionHandler({
-//            MethodArgumentNotValidException.class,
-//            ConstraintViolationException.class,
-//            HttpMessageNotReadableException.class
-//    })
-//    ResponseEntity<ErrorResponse> handleJavaxValidationExceptions(final RuntimeException e) {
-//        log.error("Exception: " + e.getMessage(), e);
-//        return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
-//    } //todo check how works
-
     @ExceptionHandler(NotFoundException.class)
     ResponseEntity<ErrorResponse> handleNotFoundExceptions(final NotFoundException e) {
         log.error("Exception: " + e.getMessage(), e);
@@ -46,6 +36,5 @@ public class ErrorHandler {
         log.error("Exception: " + e.getMessage(), e);
         return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.CONFLICT);
     }
-    //TODO: дописать корректное отображение ошибок по спецификации
 
 }

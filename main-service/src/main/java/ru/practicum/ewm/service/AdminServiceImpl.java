@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.dto.CategoryDto;
 import ru.practicum.ewm.dto.compilation.CompilationDto;
@@ -13,6 +15,7 @@ import ru.practicum.ewm.dto.compilation.UpdateCompilationRequest;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.dto.event.UpdateEventAdminRequest;
+import ru.practicum.ewm.dto.filter.AdminSearchFilter;
 import ru.practicum.ewm.dto.user.UserDto;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
@@ -38,6 +41,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
+import static ru.practicum.ewm.dto.EventSpecification.adminSearchFilterToSpecification;
 
 @Service
 @Slf4j
@@ -111,7 +116,7 @@ public class AdminServiceImpl implements AdminService {
         try {
             categoryRepository.findById(categoryId).orElseThrow(() -> new NotFoundException("Category not found"));
             categoryRepository.deleteById(categoryId);
-            log.info("Deleted category with id: {}", categoryId);//TODO:проверить обрабатывается ли случай связанности данных
+            log.info("Deleted category with id: {}", categoryId);
         } catch (ConstraintViolationException | DataIntegrityViolationException e) {
             throw new ConflictException(e.getMessage());
         }
@@ -249,4 +254,25 @@ public class AdminServiceImpl implements AdminService {
     }
 
 
+    @Override
+    public List<EventFullDto> getEvents(AdminSearchFilter adminSearchFilter, PageRequest page) {
+        List<Specification<Event>> specifications = adminSearchFilterToSpecification(adminSearchFilter);
+        Page<Event> eventPage;
+        if (specifications.isEmpty()) {
+            eventPage = eventRepository.findAll(page);
+        } else {
+            eventPage = eventRepository.findAll(
+                    specifications.stream()
+                            .reduce(Specification::and)
+                            .orElseThrow(() -> new ValidationException("Request is empty")),
+                    page
+            );
+        }
+        List<EventFullDto> eventFullDtos = new ArrayList<>();
+        for (Event event :
+                eventPage.getContent()) {
+            eventFullDtos.add(EventFullMapper.toEventFullDto(event, privateService.getConfirmedRequests(event.getId()), privateService.getEventViews(event.getId())));
+        }
+        return eventFullDtos;
+    }
 }

@@ -14,7 +14,7 @@ public class EventShortMapper {
     public static EventShortDto toEventShortDto(Event event, Long confirmedRequests, Long views) {
         return EventShortDto.builder()
                 .annotation(event.getAnnotation())
-                .categoryDto(CategoryMapper.toCategoryDto(event.getCategory()))
+                .category(CategoryMapper.toCategoryDto(event.getCategory()))
                 .confirmedRequests(confirmedRequests)
                 .eventDate(event.getEventDate().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)))
                 .id(event.getId())

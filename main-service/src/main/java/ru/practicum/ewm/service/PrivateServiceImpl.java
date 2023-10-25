@@ -88,7 +88,6 @@ public class PrivateServiceImpl implements PrivateService {
         } else if (!event.getState().equals(EventStatus.PUBLISHED)) {
             throw new ConflictException("Event is not published");
         } else if (event.getParticipantsLimit() != 0 && getConfirmedRequests(eventId) >= event.getParticipantsLimit()) {
-            //todo:check if requests need to be confirmed
             throw new ConflictException("Request limit for event");
         }
         ParticipationRequestStatus status = ParticipationRequestStatus.PENDING;
@@ -181,6 +180,9 @@ public class PrivateServiceImpl implements PrivateService {
 
     @Override
     public EventRequestStatusUpdateResult patchParticipationRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updateRequest) {
+        if (updateRequest == null) {
+            throw new ConflictException("Conflict");
+        }
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("event not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("user not found"));
         if (!user.getId().equals(event.getInitiator().getId())) {
@@ -297,7 +299,6 @@ public class PrivateServiceImpl implements PrivateService {
     }
 
     public Long getConfirmedRequests(Long eventId) {
-        //todo check if correctly changed to confirmed requests
         return participationRequestRepository.countByEvent_IdAndStatus(eventId, ParticipationRequestStatus.CONFIRMED);
     }
 }
