@@ -12,9 +12,11 @@ import ru.practicum.ewm.dto.EndpointHitDto;
 @Service
 public class EndpointHitClient {
     private static final String API_PREFIX = "/hit";
+    //private final static String SERVER_URL = "http://localhost:9090";
+    private final static String SERVER_URL = "http://stats-server:9090";
     private final RestTemplate restTemplate;
 
-    public EndpointHitClient(@Value("http://localhost:9090") String serverUrl, RestTemplateBuilder builder) {
+    public EndpointHitClient(@Value(SERVER_URL) String serverUrl, RestTemplateBuilder builder) {
         this.restTemplate = builder
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
                 .requestFactory(HttpComponentsClientHttpRequestFactory::new)

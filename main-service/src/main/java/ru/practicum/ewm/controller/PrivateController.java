@@ -88,7 +88,7 @@ public class PrivateController {
     ResponseEntity<EventRequestStatusUpdateResult> patchParticipationRequestsStatusByOwner(
             @PathVariable @Positive Long userId,
             @PathVariable @Positive Long eventId,
-            @RequestParam(required = false) @Validated EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest
+            @RequestBody @Validated EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest
     ) {
         log.info("Patch requests for event by initiator, userId={}, eventId={}, updateRequest:{}", userId, eventId, eventRequestStatusUpdateRequest);
         return new ResponseEntity<>(privateService.patchParticipationRequests(userId, eventId, eventRequestStatusUpdateRequest), HttpStatus.OK);

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.emw.client.EndpointHitClient;
 import ru.practicum.ewm.dto.CategoryDto;
 import ru.practicum.ewm.dto.EndpointHitDto;
 import ru.practicum.ewm.dto.compilation.CompilationDto;
@@ -33,7 +34,7 @@ public class PublicController {
 
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     private final PublicService publicService;
-    //private final EndpointHitClient endpointHitClient;
+    private final EndpointHitClient endpointHitClient;
 
 
     @GetMapping("/compilations")
@@ -103,7 +104,7 @@ public class PublicController {
                 .uri(request.getRequestURI())
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)))
                 .build();
-        //log.info("made request to stats service, endpointHitDto:{}", endpointHitClient.makeHit(endpointHitDto));
+        log.info("made request to stats service, endpointHitDto:{}", endpointHitClient.makeHit(endpointHitDto));
         return new ResponseEntity<>(publicService.getEvents(publicSearchFilter, page), HttpStatus.OK);
     }
 
@@ -119,7 +120,7 @@ public class PublicController {
                 .uri(request.getRequestURI())
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)))
                 .build();
-        //log.info("made request to stats service, endpointHitDto:{}", endpointHitClient.makeHit(endpointHitDto));
+        log.info("made request to stats service, endpointHitDto:{}", endpointHitClient.makeHit(endpointHitDto));
         //todo реализовать нормальный доступ к статистике
         return new ResponseEntity<>(publicService.getEvent(id), HttpStatus.OK);
     }
