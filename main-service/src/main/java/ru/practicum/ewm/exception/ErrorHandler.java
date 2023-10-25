@@ -1,14 +1,11 @@
 package ru.practicum.ewm.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import javax.validation.ConstraintViolationException;
 
 
 @RestControllerAdvice
@@ -16,10 +13,7 @@ import javax.validation.ConstraintViolationException;
 public class ErrorHandler {
 
     @ExceptionHandler({
-            MethodArgumentNotValidException.class,
-            ConstraintViolationException.class,
-            HttpMessageNotReadableException.class,
-            ValidationException.class
+            ValidationException.class,
     })
     ResponseEntity<ErrorResponse> handleValidationExceptions(final ValidationException e) {
         log.error("Exception: " + e.getMessage(), e);
@@ -33,8 +27,12 @@ public class ErrorHandler {
         return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(ConflictException.class)
-    ResponseEntity<ErrorResponse> handleConflictExceptions(final ConflictException e) {
+    @ExceptionHandler({
+            org.hibernate.exception.ConstraintViolationException.class,
+            DataIntegrityViolationException.class,
+            ConflictException.class
+    })
+    ResponseEntity<ErrorResponse> handleDatabaseExceptions(final ConflictException e) {
         log.error("Exception: " + e.getMessage(), e);
         return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.CONFLICT);
     }

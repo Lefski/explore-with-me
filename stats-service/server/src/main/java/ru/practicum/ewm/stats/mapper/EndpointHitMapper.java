@@ -16,7 +16,7 @@ public class EndpointHitMapper {
                 endpointHit.getApp(),
                 endpointHit.getUri(),
                 endpointHit.getIp(),
-                endpointHit.getTimestamp().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));//TODO:check how works
+                endpointHit.getTimestamp().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
     }
 
     public static EndpointHit toEndpointHit(EndpointHitDto endpointHitDto) {

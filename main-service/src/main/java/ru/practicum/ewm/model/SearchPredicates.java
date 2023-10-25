@@ -1,4 +1,6 @@
 package ru.practicum.ewm.model;
 
-public class Event {
+public class SearchPredicates {
+
+
 }
