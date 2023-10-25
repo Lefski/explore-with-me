@@ -12,8 +12,8 @@ import ru.practicum.ewm.dto.EndpointHitDto;
 @Service
 public class EndpointHitClient {
     private static final String API_PREFIX = "/hit";
-    //private final static String SERVER_URL = "http://localhost:9090";
-    private final static String SERVER_URL = "http://stats-server:9090";
+    //private static final String SERVER_URL = "http://localhost:9090";
+    private static final String SERVER_URL = "http://stats-server:9090";
     private final RestTemplate restTemplate;
 
     public EndpointHitClient(@Value(SERVER_URL) String serverUrl, RestTemplateBuilder builder) {

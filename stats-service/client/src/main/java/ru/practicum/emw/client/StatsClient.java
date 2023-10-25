@@ -17,8 +17,8 @@ import java.util.Map;
 @Service
 public class StatsClient {
     private static final String API_PREFIX = "/stats";
-    //private final static String SERVER_URL = "http://localhost:9090";
-    private final static String SERVER_URL = "http://stats-server:9090";
+    //private static final String SERVER_URL = "http://localhost:9090";
+    private static final String SERVER_URL = "http://stats-server:9090";
     private final RestTemplate restTemplate;
 
 
