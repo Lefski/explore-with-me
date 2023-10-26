@@ -43,11 +43,9 @@ public class EventSpecification {
         specifications.add((filterPublic.getRangeStart() == null || filterPublic.getRangeEnd() == null)
                 ? checkByDate(LocalDateTime.now(), LocalDateTime.now().plusYears(10))
                 : checkByDate(filterPublic.getRangeStart(), filterPublic.getRangeEnd()));
-        specifications.add(filterPublic.getOnlyAvailable() == null
-                ? null
-                //: checkByAvailableOnly(filterPublic.getOnlyAvailable()));
-                //todo check
-                : null);
+        //: checkByAvailableOnly(filterPublic.getOnlyAvailable()));
+        //todo check
+        specifications.add(null);
         return specifications.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 

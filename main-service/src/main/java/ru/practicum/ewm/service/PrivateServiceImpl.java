@@ -8,6 +8,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.emw.client.StatsClient;
 import ru.practicum.ewm.dto.ViewStatsDto;
+import ru.practicum.ewm.dto.comment.CommentDto;
+import ru.practicum.ewm.dto.comment.NewCommentDto;
+import ru.practicum.ewm.dto.comment.UpdateCommentDto;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.dto.event.NewEventDto;
@@ -18,20 +21,20 @@ import ru.practicum.ewm.dto.participationRequest.ParticipationRequestDto;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.exception.ValidationException;
+import ru.practicum.ewm.mapper.CommentMapper;
 import ru.practicum.ewm.mapper.event.EventFullMapper;
 import ru.practicum.ewm.mapper.event.EventShortMapper;
 import ru.practicum.ewm.mapper.event.NewEventMapper;
 import ru.practicum.ewm.mapper.participationRequest.ParticipationRequestMapper;
 import ru.practicum.ewm.model.Category;
 import ru.practicum.ewm.model.User;
+import ru.practicum.ewm.model.comment.Comment;
+import ru.practicum.ewm.model.comment.CommentStatus;
 import ru.practicum.ewm.model.event.Event;
 import ru.practicum.ewm.model.event.EventStatus;
 import ru.practicum.ewm.model.participationRequest.ParticipationRequest;
 import ru.practicum.ewm.model.participationRequest.ParticipationRequestStatus;
-import ru.practicum.ewm.repository.CategoryRepository;
-import ru.practicum.ewm.repository.EventRepository;
-import ru.practicum.ewm.repository.ParticipationRequestRepository;
-import ru.practicum.ewm.repository.UserRepository;
+import ru.practicum.ewm.repository.*;
 
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
@@ -49,6 +52,7 @@ public class PrivateServiceImpl implements PrivateService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final ParticipationRequestRepository participationRequestRepository;
+    private final CommentRepository commentRepository;
     private final StatsClient statsClient;
 
 
@@ -338,10 +342,67 @@ public class PrivateServiceImpl implements PrivateService {
             return 0L;
         } else
             return stats.get(0).getHits();
-        //todo make request to stats server
+        //todo make mass request to stats server
     }
 
     public Long getConfirmedRequests(Long eventId) {
         return participationRequestRepository.countByEvent_IdAndStatus(eventId, ParticipationRequestStatus.CONFIRMED);
+    }
+
+    @Override
+    public CommentDto postComment(NewCommentDto newCommentDto, Long userId) {
+        User creator = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("no such user"));
+        Event event = eventRepository.findById(newCommentDto.getEventId()).orElseThrow(() -> new NotFoundException("no such event"));
+        if (!event.getState().equals(EventStatus.PUBLISHED)) {
+            throw new ValidationException("Event is not published");
+        }
+        Comment comment = CommentMapper.toComment(newCommentDto, creator);
+        try {
+            CommentDto savedComment = CommentMapper.toCommentDto(commentRepository.save(comment));
+            log.info("Post comment request completed, saved comment:{}", savedComment);
+            return savedComment;
+        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+            throw new ConflictException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<CommentDto> getUserComments(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("no such user");
+        }
+        List<Comment> commentsList = commentRepository.findAllByCreator_IdAndStatusIsNot(userId);
+        List<CommentDto>
+        for (Comment comment :
+                commentsList) {
+
+        }
+    }
+
+    @Override
+    public CommentDto deleteCommentByUser(Long userId, Long commentId) {
+        //комментарий не удаляется совсем, обновляется текст на "Комментарий удален пользователем Х + время удаления", при этом он сохраняется в БД
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("no such user");
+        }
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("no such comment"));
+        if (comment.getStatus().equals(CommentStatus.DELETED)) {
+            throw new ConflictException("comment is already deleted");
+        }
+        comment.setStatus(CommentStatus.DELETED);
+        comment.setUpdated(LocalDateTime.now());
+        comment.setText("Пользователь c id=" + userId + " удалил свой комментарий");
+        try {
+            CommentDto deletedComment = CommentMapper.toCommentDto(commentRepository.save(comment));
+            log.info("Delete comment request completed, comment:{}", deletedComment);
+            return deletedComment;
+        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+            throw new ConflictException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommentDto patchCommentByUser(Long userId, Long commentId, UpdateCommentDto updateCommentDto) {
+        return null;
     }
 }

@@ -1,6 +1,9 @@
 package ru.practicum.ewm.service;
 
 import org.springframework.data.domain.Pageable;
+import ru.practicum.ewm.dto.comment.CommentDto;
+import ru.practicum.ewm.dto.comment.NewCommentDto;
+import ru.practicum.ewm.dto.comment.UpdateCommentDto;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.dto.event.NewEventDto;
@@ -30,4 +33,12 @@ public interface PrivateService {
     EventRequestStatusUpdateResult patchParticipationRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updateRequest);
 
     EventFullDto patchEventByInitiator(Long userId, Long eventId, UpdateEventUserRequest updateRequest);
+
+    CommentDto postComment(NewCommentDto newCommentDto, Long userId);
+
+    List<CommentDto> getUserComments(Long userId);
+
+    CommentDto deleteCommentByUser(Long userId, Long commentId);
+
+    CommentDto patchCommentByUser(Long userId, Long commentId, UpdateCommentDto updateCommentDto);
 }

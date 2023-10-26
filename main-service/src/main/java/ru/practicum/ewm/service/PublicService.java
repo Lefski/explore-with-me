@@ -3,6 +3,7 @@ package ru.practicum.ewm.service;
 
 import org.springframework.data.domain.Pageable;
 import ru.practicum.ewm.dto.CategoryDto;
+import ru.practicum.ewm.dto.comment.CommentDto;
 import ru.practicum.ewm.dto.compilation.CompilationDto;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
@@ -23,4 +24,6 @@ public interface PublicService {
     EventFullDto getEvent(Long eventId);
 
     List<EventShortDto> getEvents(PublicSearchFilter publicSearchFilter, Pageable page);
+
+    List<CommentDto> getComments(Long eventId);
 }
