@@ -36,6 +36,7 @@ public class CommentMapper {
                 .creator(creatorDto)
                 .text(comment.getText())
                 .updateTime(updateTime.format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)))
+                .status(comment.getStatus())
                 .build();
     }
 

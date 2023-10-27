@@ -3,7 +3,7 @@ drop table if exists
     categories,
     events,
     participation_requests,
-    compilation,
+    compilations,
     compilations_events,
     comments,
     cascade;

@@ -147,7 +147,6 @@ public class PrivateController {
             @PathVariable @Positive Long commentId
     ) {
         log.info("Delete comment by creator request accepted, userId={}, commentId={}", userId, commentId);
-
         return new ResponseEntity<>(privateService.deleteCommentByUser(userId, commentId), HttpStatus.NO_CONTENT);
     }
 
