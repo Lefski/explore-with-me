@@ -39,7 +39,7 @@
 								}
 							}
 						},
-						"url": "{{baseUrl}}/users/1/comments"
+						"url": "stats-server:9090/users/1/comments"
 					},
 					"response": []
 				},
@@ -72,7 +72,7 @@
 								}
 							}
 						},
-						"url": "{{baseUrl}}/users/1/comments"
+						"url": "stats-server:9090/users/1/comments"
 					},
 					"response": []
 				},
@@ -100,7 +100,7 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": "{{baseUrl}}/users/1/comments/3"
+						"url": "stats-server:9090/users/1/comments/3"
 					},
 					"response": []
 				},
@@ -133,7 +133,7 @@
 								}
 							}
 						},
-						"url": "{{baseUrl}}/users/1/comments/1"
+						"url": "stats-server:9090/users/1/comments/1"
 					},
 					"response": []
 				}
@@ -192,7 +192,7 @@
 								}
 							}
 						},
-						"url": "{{baseUrl}}/admin/events/1"
+						"url": "stats-server:9090/admin/events/1"
 					},
 					"response": []
 				},
@@ -236,7 +236,7 @@
 								}
 							}
 						},
-						"url": "{{baseUrl}}/users/1/comments"
+						"url": "stats-server:9090/users/1/comments"
 					},
 					"response": []
 				},
@@ -278,7 +278,7 @@
 								}
 							}
 						},
-						"url": "{{baseUrl}}/users/1/comments"
+						"url": "stats-server:9090/users/1/comments"
 					},
 					"response": []
 				},
@@ -320,7 +320,7 @@
 								}
 							}
 						},
-						"url": "{{baseUrl}}/users/1/comments/1"
+						"url": "stats-server:9090/users/1/comments/1"
 					},
 					"response": []
 				},
@@ -364,7 +364,7 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": "{{baseUrl}}/users/1/comments"
+						"url": "stats-server:9090/users/1/comments"
 					},
 					"response": []
 				},
@@ -408,7 +408,7 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": "{{baseUrl}}/1/comments"
+						"url": "stats-server:9090/1/comments"
 					},
 					"response": []
 				},
@@ -430,7 +430,7 @@
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"url": "{{baseUrl}}/users/1/comments/1"
+						"url": "stats-server:9090/users/1/comments/1"
 					},
 					"response": []
 				},
@@ -454,7 +454,7 @@
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"url": "{{baseUrl}}/users/1/comments/1"
+						"url": "stats-server:9090/users/1/comments/1"
 					},
 					"response": []
 				},
@@ -476,7 +476,7 @@
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"url": "{{baseUrl}}/admin/comments/2/delete"
+						"url": "stats-server:9090/admin/comments/2/delete"
 					},
 					"response": []
 				},
@@ -517,7 +517,7 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": "{{baseUrl}}/1/comments"
+						"url": "stats-server:9090/1/comments"
 					},
 					"response": []
 				}
