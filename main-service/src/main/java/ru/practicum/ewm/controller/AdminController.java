@@ -77,7 +77,6 @@ public class AdminController {
                 .rangeEnd(rangeEnd)
                 .build();
         log.info("Get events with filter search by admin request accepted, filter{}", adminSearchFilter);
-
         return new ResponseEntity<>(adminService.getEvents(adminSearchFilter, page), HttpStatus.OK);
     }
 
@@ -137,6 +136,13 @@ public class AdminController {
         return new ResponseEntity<>(adminService.patchCompilation(compId, updateRequest), HttpStatus.OK);
     }
 
-    //todo раскидать общие контроллеры по отдельным контроллерам
+    @DeleteMapping("/comments/{commentId}/delete")
+    ResponseEntity<Void> deleteComment(
+            @PathVariable Long commentId
+    ) {
+        log.info("Delete comment by admin request accepted, commentId={}", commentId);
+        adminService.deleteComment(commentId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
 }

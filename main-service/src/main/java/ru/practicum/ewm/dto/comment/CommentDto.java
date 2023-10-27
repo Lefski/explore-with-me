@@ -21,7 +21,7 @@ public class CommentDto {
     private UserDto creator;
 
     private String text;
-    
+
     private CommentStatus status;
 
     @DateTimeFormat(pattern = DATE_TIME_PATTERN)

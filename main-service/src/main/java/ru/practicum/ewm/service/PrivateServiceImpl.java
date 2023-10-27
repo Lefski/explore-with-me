@@ -371,12 +371,16 @@ public class PrivateServiceImpl implements PrivateService {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("no such user");
         }
-        List<Comment> commentsList = commentRepository.findAllByCreator_IdAndStatusIsNot(userId);
-        List<CommentDto>
+        List<Comment> commentsList = commentRepository.findAllByCreator_IdAndStatusIsNot(userId, CommentStatus.DELETED);
+        List<CommentDto> commentDtos = new ArrayList<>();
         for (Comment comment :
                 commentsList) {
-
+            if (!comment.getStatus().equals(CommentStatus.DELETED)) {
+                commentDtos.add(CommentMapper.toCommentDto(comment));
+            }
         }
+        log.info("Post comment request completed, comments size={}", commentDtos.size());
+        return commentDtos;
     }
 
     @Override
@@ -403,6 +407,23 @@ public class PrivateServiceImpl implements PrivateService {
 
     @Override
     public CommentDto patchCommentByUser(Long userId, Long commentId, UpdateCommentDto updateCommentDto) {
-        return null;
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("no such user");
+        }
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("no such user"));
+        if (comment.getStatus().equals(CommentStatus.DELETED)) {
+            throw new ConflictException("comment deleted");
+        } else if (!comment.getCreator().getId().equals(userId)) {
+            throw new ConflictException("user do not have access to comment");
+        }
+        comment.setText(updateCommentDto.getText());
+        comment.setUpdated(LocalDateTime.now());
+        try {
+            CommentDto savedComment = CommentMapper.toCommentDto(commentRepository.save(comment));
+            log.info("Update comment request completed, updated comment:{}", savedComment);
+            return savedComment;
+        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+            throw new ConflictException(e.getMessage());
+        }
     }
 }
