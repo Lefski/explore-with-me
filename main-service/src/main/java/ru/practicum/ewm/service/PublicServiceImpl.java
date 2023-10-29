@@ -1,13 +1,14 @@
 package ru.practicum.ewm.service;
 
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.dto.CategoryDto;
+import ru.practicum.ewm.dto.comment.CommentDto;
 import ru.practicum.ewm.dto.compilation.CompilationDto;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
@@ -15,14 +16,18 @@ import ru.practicum.ewm.dto.filter.PublicSearchFilter;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.mapper.CategoryMapper;
+import ru.practicum.ewm.mapper.CommentMapper;
 import ru.practicum.ewm.mapper.compilation.CompilationDtoMapper;
 import ru.practicum.ewm.mapper.event.EventFullMapper;
 import ru.practicum.ewm.mapper.event.EventShortMapper;
 import ru.practicum.ewm.model.Category;
 import ru.practicum.ewm.model.Compilation;
+import ru.practicum.ewm.model.comment.Comment;
+import ru.practicum.ewm.model.comment.CommentComparator;
 import ru.practicum.ewm.model.event.Event;
 import ru.practicum.ewm.model.event.EventStatus;
 import ru.practicum.ewm.repository.CategoryRepository;
+import ru.practicum.ewm.repository.CommentRepository;
 import ru.practicum.ewm.repository.CompilationRepository;
 import ru.practicum.ewm.repository.EventRepository;
 
@@ -33,20 +38,15 @@ import static ru.practicum.ewm.dto.EventSpecification.*;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class PublicServiceImpl implements PublicService {
 
     private final CategoryRepository categoryRepository;
     private final CompilationRepository compilationRepository;
     private final PrivateServiceImpl privateService;
     private final EventRepository eventRepository;
+    private final CommentRepository commentRepository;
 
-    @Autowired
-    public PublicServiceImpl(CategoryRepository categoryRepository, CompilationRepository compilationRepository, PrivateServiceImpl privateService, EventRepository eventRepository) {
-        this.categoryRepository = categoryRepository;
-        this.compilationRepository = compilationRepository;
-        this.privateService = privateService;
-        this.eventRepository = eventRepository;
-    }
 
     @Override
     public List<CategoryDto> getCategories(Pageable page) {
@@ -129,5 +129,21 @@ public class PublicServiceImpl implements PublicService {
         } else {
             return eventShortDtos;
         }
+    }
+
+    @Override
+    public List<CommentDto> getComments(Long eventId) {
+        if (!eventRepository.existsById(eventId)) {
+            throw new NotFoundException("No such event");
+        }
+        List<Comment> comments = commentRepository.findCommentsByEventId(eventId);
+        List<CommentDto> commentDtos = new ArrayList<>();
+        comments.sort(new CommentComparator());
+        for (Comment comment :
+                comments) {
+            commentDtos.add(CommentMapper.toCommentDto(comment));
+        }
+        log.info("get comments public request completed, size={}", commentDtos.size());
+        return commentDtos;
     }
 }

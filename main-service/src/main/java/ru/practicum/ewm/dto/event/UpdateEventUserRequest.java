@@ -15,7 +15,7 @@ import javax.validation.constraints.Size;
 public class UpdateEventUserRequest {
 
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
-    StateAction stateAction;
+    private StateAction stateAction;
     @Size(max = 2000, min = 20, message = "annotation size may not be >2000 or <20")
     private String annotation;
     private Long category;

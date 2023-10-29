@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.dto.comment.CommentDto;
+import ru.practicum.ewm.dto.comment.NewCommentDto;
+import ru.practicum.ewm.dto.comment.UpdateCommentDto;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.dto.event.NewEventDto;
@@ -121,5 +124,40 @@ public class PrivateController {
         return new ResponseEntity<>(privateService.patchParticipationRequest(userId, requestId), HttpStatus.OK);
     }
 
+    @PostMapping("/{userId}/comments")
+    ResponseEntity<CommentDto> postComment(
+            @PathVariable @Positive Long userId,
+            @RequestBody @Validated NewCommentDto newCommentDto
+    ) {
+        log.info("Post comment request accepted, userId={}, newCommentDto={}", userId, newCommentDto);
+        return new ResponseEntity<>(privateService.postComment(newCommentDto, userId), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{userId}/comments")
+    ResponseEntity<List<CommentDto>> getCommentsByCreator(
+            @PathVariable @Positive Long userId
+    ) {
+        log.info("Get comments request accepted, userId={}", userId);
+        return new ResponseEntity<>(privateService.getUserComments(userId), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{userId}/comments/{commentId}")
+    ResponseEntity<CommentDto> deleteCommentById(
+            @PathVariable @Positive Long userId,
+            @PathVariable @Positive Long commentId
+    ) {
+        log.info("Delete comment by creator request accepted, userId={}, commentId={}", userId, commentId);
+        return new ResponseEntity<>(privateService.deleteCommentByUser(userId, commentId), HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/{userId}/comments/{commentId}")
+    ResponseEntity<CommentDto> patchComment(
+            @PathVariable @Positive Long userId,
+            @PathVariable @Positive Long commentId,
+            @RequestBody @Validated UpdateCommentDto updateCommentDto
+    ) {
+        log.info("Patch comment by creator request accepted, userId={}, commentId={}, updateCommentDto:{}", userId, commentId, updateCommentDto);
+        return new ResponseEntity<>(privateService.patchCommentByUser(userId, commentId, updateCommentDto), HttpStatus.OK);
+    }
 
 }

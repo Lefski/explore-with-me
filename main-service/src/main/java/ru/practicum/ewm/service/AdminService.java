@@ -35,4 +35,7 @@ public interface AdminService {
     CompilationDto patchCompilation(Long compId, UpdateCompilationRequest updateRequest);
 
     List<EventFullDto> getEvents(AdminSearchFilter adminSearchFilter, PageRequest page);
+
+    void deleteComment(Long commentId);
+
 }

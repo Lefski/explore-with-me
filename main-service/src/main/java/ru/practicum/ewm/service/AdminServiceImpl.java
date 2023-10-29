@@ -1,7 +1,7 @@
 package ru.practicum.ewm.service;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.dto.CategoryDto;
+import ru.practicum.ewm.dto.comment.CommentDto;
 import ru.practicum.ewm.dto.compilation.CompilationDto;
 import ru.practicum.ewm.dto.compilation.NewCompilationDto;
 import ru.practicum.ewm.dto.compilation.UpdateCompilationRequest;
@@ -21,6 +22,7 @@ import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.mapper.CategoryMapper;
+import ru.practicum.ewm.mapper.CommentMapper;
 import ru.practicum.ewm.mapper.UserMapper;
 import ru.practicum.ewm.mapper.compilation.CompilationDtoMapper;
 import ru.practicum.ewm.mapper.compilation.NewCompilationMapper;
@@ -29,12 +31,11 @@ import ru.practicum.ewm.mapper.event.EventShortMapper;
 import ru.practicum.ewm.model.Category;
 import ru.practicum.ewm.model.Compilation;
 import ru.practicum.ewm.model.User;
+import ru.practicum.ewm.model.comment.Comment;
+import ru.practicum.ewm.model.comment.CommentStatus;
 import ru.practicum.ewm.model.event.Event;
 import ru.practicum.ewm.model.event.EventStatus;
-import ru.practicum.ewm.repository.CategoryRepository;
-import ru.practicum.ewm.repository.CompilationRepository;
-import ru.practicum.ewm.repository.EventRepository;
-import ru.practicum.ewm.repository.UserRepository;
+import ru.practicum.ewm.repository.*;
 
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
@@ -46,6 +47,7 @@ import static ru.practicum.ewm.dto.EventSpecification.adminSearchFilterToSpecifi
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class AdminServiceImpl implements AdminService {
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
@@ -54,15 +56,8 @@ public class AdminServiceImpl implements AdminService {
     private final EventRepository eventRepository;
     private final PrivateServiceImpl privateService;
     private final CompilationRepository compilationRepository;
+    private final CommentRepository commentRepository;
 
-    @Autowired
-    public AdminServiceImpl(UserRepository userRepository, CategoryRepository categoryRepository, EventRepository eventRepository, PrivateServiceImpl privateService, CompilationRepository compilationRepository) {
-        this.userRepository = userRepository;
-        this.categoryRepository = categoryRepository;
-        this.eventRepository = eventRepository;
-        this.privateService = privateService;
-        this.compilationRepository = compilationRepository;
-    }
 
     @Override
     public UserDto postUser(UserDto userDto) {
@@ -274,5 +269,24 @@ public class AdminServiceImpl implements AdminService {
             eventFullDtos.add(EventFullMapper.toEventFullDto(event, privateService.getConfirmedRequests(event.getId()), privateService.getEventViews(event.getId())));
         }
         return eventFullDtos;
+    }
+
+    @Override
+    public void deleteComment(Long commentId) {
+        //комментарий не удаляется совсем, обновляется текст на "Комментарий удален пользователем Х + время удаления", при этом он сохраняется в БД
+
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("no such comment"));
+        if (comment.getStatus().equals(CommentStatus.DELETED)) {
+            throw new ConflictException("comment is already deleted");
+        }
+        comment.setStatus(CommentStatus.DELETED);
+        comment.setUpdated(LocalDateTime.now());
+        comment.setText("Администратор удалил данный комментарий");
+        try {
+            CommentDto deletedComment = CommentMapper.toCommentDto(commentRepository.save(comment));
+            log.info("Delete comment request completed, comment:{}", deletedComment);
+        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+            throw new ConflictException(e.getMessage());
+        }
     }
 }

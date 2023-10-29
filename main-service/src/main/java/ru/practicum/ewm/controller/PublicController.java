@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.emw.client.EndpointHitClient;
 import ru.practicum.ewm.dto.CategoryDto;
 import ru.practicum.ewm.dto.EndpointHitDto;
+import ru.practicum.ewm.dto.comment.CommentDto;
 import ru.practicum.ewm.dto.compilation.CompilationDto;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
@@ -73,7 +74,6 @@ public class PublicController {
         return new ResponseEntity<>(publicService.getCategory(catId), HttpStatus.OK);
     }
 
-    //todo check!!!
     @GetMapping("/events")
     ResponseEntity<List<EventShortDto>> getEvents(
             @RequestParam(required = false, defaultValue = "") String text,
@@ -121,8 +121,15 @@ public class PublicController {
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)))
                 .build();
         log.info("made request to stats service, endpointHitDto:{}", endpointHitClient.makeHit(endpointHitDto));
-        //todo реализовать нормальный доступ к статистике
         return new ResponseEntity<>(publicService.getEvent(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{eventId}/comments")
+    ResponseEntity<List<CommentDto>> getEventComments(
+            @PathVariable @Positive Long eventId
+    ) {
+        log.info("Get event comments request accepted, eventId={}", eventId);
+        return new ResponseEntity<>(publicService.getComments(eventId), HttpStatus.OK);
     }
 
 
