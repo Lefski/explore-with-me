@@ -38,4 +38,6 @@ public interface AdminService {
 
     void deleteComment(Long commentId);
 
+    void deleteEvent(Long eventId);
+
 }

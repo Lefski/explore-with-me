@@ -89,6 +89,15 @@ public class AdminController {
         return new ResponseEntity<>(adminService.updateEventByAdmin(eventId, updateRequest), HttpStatus.OK);
     }
 
+    @DeleteMapping("/delete/{eventId}")
+    ResponseEntity<Void> deleteEventByAdmin(
+            @PathVariable @Positive Long eventId
+    ) {
+        log.info("Delete event by admin request accepted, eventId={}", eventId);
+        adminService.deleteEvent(eventId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 
     @PostMapping("/users")
     ResponseEntity<UserDto> postUser(@RequestBody @Validated UserDto userDto) {
@@ -144,5 +153,7 @@ public class AdminController {
         adminService.deleteComment(commentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
 
 }

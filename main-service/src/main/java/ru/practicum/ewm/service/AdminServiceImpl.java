@@ -289,4 +289,16 @@ public class AdminServiceImpl implements AdminService {
             throw new ConflictException(e.getMessage());
         }
     }
+
+    @Override
+    public void deleteEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(()-> new NotFoundException("no such event"));
+        if(!event.getState().equals(EventStatus.DELETED_BY_ADMIN)) {
+            event.setState(EventStatus.DELETED_BY_ADMIN);
+        } else {
+            throw new ConflictException("Event status is already DELETED_BY_ADMIN");
+        }
+        log.info("Delete event by id request completed, event={}", event);
+        eventRepository.save(event);
+    }
 }
